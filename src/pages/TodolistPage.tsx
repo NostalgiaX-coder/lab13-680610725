@@ -1,28 +1,48 @@
 import TaskCard from "../components/TaskCard";
 import TodoModal from "../components/Modal";
 import { type TaskCardProps } from "../libs/Todolist";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const STORAGE_KEY = "todo-list-tasks";
 
 function App() {
-  const [tasks, setTasks] = useState<TaskCardProps[]>([]);
+  // โหลดค่าเริ่มต้นจาก localStorage ตอน mount (lazy initializer)
+  const [tasks, setTasks] = useState<TaskCardProps[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // ทุกครั้งที่ tasks เปลี่ยน ให้บันทึกลง localStorage (ข้อ 4)
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  }, [tasks]);
 
   const handleAdd = (newTask: TaskCardProps) => {
-    console.log("TODO handleAdd", newTask);
+    setTasks((prev) => [...prev, newTask]);
   };
 
   const deleteTask = (taskId: string) => {
-    console.log("TODO deleteTask", taskId);
+    setTasks((prev) => prev.filter((task) => task.id !== taskId));
   };
 
   const toggleDoneTask = (taskId: string) => {
-    console.log("TODO toggleDoneTask", taskId);
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === taskId ? { ...task, isDone: !task.isDone } : task
+      )
+    );
   };
+
+  // นับจำนวนรายการทั้งหมดและที่เสร็จแล้ว โดยใช้ filter (ข้อ 3)
+  const doneCount = tasks.filter((task) => task.isDone).length;
 
   return (
     <div className="col-12 m-2 p-0">
       <div className="container text-center">
         <h2>Todo List</h2>
-        <span className="m-2">All : () Done : ()</span>
+        <span className="badge bg-light text-dark border border-primary m-2 p-2 fs-6">
+          All : ({tasks.length}) Done : ({doneCount})
+        </span>
 
         <div>
           <button

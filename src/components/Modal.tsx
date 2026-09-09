@@ -10,7 +10,25 @@ export default function Modal({ onAdd }: props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const handleSubmit = () => {};
+  const handleSubmit = () => {
+    if (title.trim() === "") return; // ห้ามเพิ่มถ้า title ว่าง
+
+    const newTask: TaskCardProps = {
+      id: uuidv4(), // uuid รับประกัน id ไม่ซ้ำกัน
+      title: title.trim(),
+      description: description.trim(),
+      isDone: false,
+    };
+
+    onAdd(newTask);
+
+    // เคลียร์ฟอร์มกลับเป็นค่าเริ่มต้น
+    setTitle("");
+    setDescription("");
+
+    // ปิด modal โดยจำลองการกดปุ่ม Cancel (data-bs-dismiss="modal")
+    document.getElementById("closeModal")?.click();
+  };
 
   const titleOnchange = (event: any) => {
     setTitle(event.target.value);
@@ -60,7 +78,7 @@ export default function Modal({ onAdd }: props) {
             <button
               type="button"
               className="btn btn-success"
-              onClick={() => {}}
+              onClick={handleSubmit}
             >
               Save
             </button>
